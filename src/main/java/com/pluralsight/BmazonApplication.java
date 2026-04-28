@@ -58,9 +58,11 @@ public class BmazonApplication {
                     break;
                 case "2":
                     System.out.println("Deposits");
+                    showDeposites();
                     break;
                 case "3":
                     System.out.println("Payments");
+                    showPayments();
                     break;
                 case "4":
                     System.out.println("Reports");
@@ -97,6 +99,62 @@ public class BmazonApplication {
             bufReader.close();
         }
         catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showDeposites() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+                Transaction transaction = getTransaction(input);
+
+                if (transaction.getAmount() > 0) {
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showPayments() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+                Transaction transaction = getTransaction(input);
+
+                if (transaction.getAmount() < 0) {
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
