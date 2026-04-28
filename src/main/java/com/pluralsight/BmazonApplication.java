@@ -3,6 +3,8 @@ package com.pluralsight;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class BmazonApplication {
@@ -58,7 +60,7 @@ public class BmazonApplication {
                     break;
                 case "2":
                     System.out.println("Deposits");
-                    showDeposites();
+                    showDeposits();
                     break;
                 case "3":
                     System.out.println("Payments");
@@ -103,7 +105,7 @@ public class BmazonApplication {
         }
     }
 
-    public static void showDeposites() {
+    public static void showDeposits() {
         try {
             BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
             String input;
@@ -185,15 +187,19 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Month To Date");
+                    showMonthToDate();
                     break;
                 case "2":
                     System.out.println("Previous Month");
+                    showPreviousMonth();
                     break;
                 case "3":
                     System.out.println("Year To Date");
+                    showYearToDate();
                     break;
                 case "4":
                     System.out.println("Previous Year");
+                    showPreviousYear();
                     break;
                 case "5":
                     System.out.println("Search by Vendor");
@@ -202,6 +208,166 @@ public class BmazonApplication {
                     System.out.println("Exit");
                     return;
             }
+        }
+    }
+
+    public static void showMonthToDate() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            LocalDate today = LocalDate.now();
+            int currentYear = today.getYear();
+            int currentMonth = today.getMonthValue();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+
+                Transaction transaction = getTransaction(input);
+
+                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
+
+                if (transactionDate.getYear() == currentYear &&
+                        transactionDate.getMonthValue() == currentMonth) {
+
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showPreviousMonth() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            LocalDate today = LocalDate.now();
+            LocalDate previousMonthDate = today.minusMonths(1);
+
+            int currentYear = today.getYear();
+            int previousMonth = previousMonthDate.getMonthValue();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+
+                Transaction transaction = getTransaction(input);
+
+                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
+
+                if (transactionDate.getYear() == currentYear &&
+                        transactionDate.getMonthValue() == previousMonth) {
+
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showYearToDate() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            LocalDate today = LocalDate.now();
+            int currentYear = today.getYear();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+
+                Transaction transaction = getTransaction(input);
+
+                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
+
+                if (transactionDate.getYear() == currentYear) {
+
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showPreviousYear() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+
+            LocalDate today = LocalDate.now();
+            LocalDate previousYearDate = today.minusYears(1);
+
+            int previousYear = previousYearDate.getYear();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            bufReader.readLine();
+
+            while ((input = bufReader.readLine()) != null) {
+
+                Transaction transaction = getTransaction(input);
+
+                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
+
+                if (transactionDate.getYear() == previousYear) {
+
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
