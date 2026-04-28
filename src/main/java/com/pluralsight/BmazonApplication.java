@@ -1,5 +1,8 @@
 package com.pluralsight;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class BmazonApplication {
@@ -51,6 +54,7 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("All");
+                    showAllTransactions();
                     break;
                 case "2":
                     System.out.println("Deposits");
@@ -67,6 +71,46 @@ public class BmazonApplication {
                     return;
             }
         }
+    }
+
+    public static void showAllTransactions() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input;
+            bufReader.readLine();
+            while((input = bufReader.readLine()) != null) {
+                Transaction transaction = getTransaction(input);
+
+                System.out.printf(
+                                "Date: %s " +
+                                "Time: %s " +
+                                "Description: %s " +
+                                "Vendor: %s" +
+                                "Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
+            }
+            bufReader.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Transaction getTransaction(String input) {
+        String[] transactionInfo = input.split("\\|");
+
+        return new Transaction(
+                transactionInfo[0].trim(),
+                transactionInfo[1].trim(),
+                transactionInfo[2].trim(),
+                transactionInfo[3].trim(),
+                Double.parseDouble(transactionInfo[4].trim())
+        );
     }
 
     public static void runReports(Scanner input) {
