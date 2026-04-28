@@ -203,6 +203,7 @@ public class BmazonApplication {
                     break;
                 case "5":
                     System.out.println("Search by Vendor");
+                    showByVendor(input);
                     break;
                 case "0":
                     System.out.println("Exit");
@@ -352,6 +353,40 @@ public class BmazonApplication {
                 LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
                 if (transactionDate.getYear() == previousYear) {
+
+                    System.out.printf(
+                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                            transaction.getDate(),
+                            transaction.getTime(),
+                            transaction.getDescription(),
+                            transaction.getVendor(),
+                            transaction.getAmount()
+                    );
+                }
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showByVendor(Scanner input) {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String line;
+
+            System.out.print("Enter vendor name: ");
+            String vendorInput = input.nextLine();
+
+            bufReader.readLine();
+
+            while ((line = bufReader.readLine()) != null) {
+
+                Transaction transaction = getTransaction(line);
+
+                if (transaction.getVendor().equalsIgnoreCase(vendorInput)) {
 
                     System.out.printf(
                             "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
