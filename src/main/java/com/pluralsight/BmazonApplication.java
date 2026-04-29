@@ -35,6 +35,7 @@ public class BmazonApplication {
                     break;
                 case "2":
                     System.out.println("Make Payment (Debit)");
+                    makePayment(input);
                     break;
                 case "3":
                     System.out.println("Ledger");
@@ -62,6 +63,42 @@ public class BmazonApplication {
 
         System.out.print("Enter amount: ");
         double amount = Double.parseDouble(input.nextLine());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (Objects.equals(date, "today")) {
+            date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        if (Objects.equals(time, "now")) {
+            time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+
+        try (FileWriter writer = new FileWriter("transactions.csv", true)) {
+
+            writer.write(String.format("%n%s|%s|%s|%s|%.2f",
+                    date, time, description, vendor, amount));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void makePayment(Scanner input) {
+        System.out.print("Enter date (YYYY-MM-DD, type 'today' for today's time): ");
+        String date = input.nextLine();
+
+        System.out.print("Enter time (HH-mm-ss, type 'now' for time now): ");
+        String time = input.nextLine();
+
+        System.out.print("Enter description: ");
+        String description = input.nextLine();
+
+        System.out.print("Enter vendor: ");
+        String vendor = input.nextLine();
+
+        System.out.print("Enter amount: ");
+        double amount = (Double.parseDouble(input.nextLine()) * -1);
 
         LocalDateTime now = LocalDateTime.now();
 
