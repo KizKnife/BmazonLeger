@@ -2,9 +2,12 @@ package com.pluralsight;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class BmazonApplication {
@@ -28,6 +31,7 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Add Deposit");
+                    addDeposit(input);
                     break;
                 case "2":
                     System.out.println("Make Payment (Debit)");
@@ -40,6 +44,42 @@ public class BmazonApplication {
                     System.out.println("Exit");
                     return;
             }
+        }
+    }
+
+    public static void addDeposit(Scanner input) {
+        System.out.print("Enter date (YYYY-MM-DD, type 'today' for today's time): ");
+        String date = input.nextLine();
+
+        System.out.print("Enter time (HH-mm-ss, type 'now' for time now): ");
+        String time = input.nextLine();
+
+        System.out.print("Enter description: ");
+        String description = input.nextLine();
+
+        System.out.print("Enter vendor: ");
+        String vendor = input.nextLine();
+
+        System.out.print("Enter amount: ");
+        double amount = Double.parseDouble(input.nextLine());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (Objects.equals(date, "today")) {
+            date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        if (Objects.equals(time, "now")) {
+            time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+
+        try (FileWriter writer = new FileWriter("transactions.csv", true)) {
+
+            writer.write(String.format("%n%s|%s|%s|%s|%.2f",
+                    date, time, description, vendor, amount));
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -105,6 +145,18 @@ public class BmazonApplication {
         }
     }
 
+    public static Transaction getTransaction(String input) {
+        String[] transactionInfo = input.split("\\|");
+
+        return new Transaction(
+                transactionInfo[0].trim(),
+                transactionInfo[1].trim(),
+                transactionInfo[2].trim(),
+                transactionInfo[3].trim(),
+                Double.parseDouble(transactionInfo[4].trim())
+        );
+    }
+
     public static void showDeposits() {
         try {
             BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
@@ -159,18 +211,6 @@ public class BmazonApplication {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static Transaction getTransaction(String input) {
-        String[] transactionInfo = input.split("\\|");
-
-        return new Transaction(
-                transactionInfo[0].trim(),
-                transactionInfo[1].trim(),
-                transactionInfo[2].trim(),
-                transactionInfo[3].trim(),
-                Double.parseDouble(transactionInfo[4].trim())
-        );
     }
 
     public static void runReports(Scanner input) {
