@@ -189,18 +189,22 @@ public class BmazonApplication {
         }
     }
 
+    public static void printTransaction(Transaction transaction) {
+        System.out.printf(
+                "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                transaction.getDate(),
+                transaction.getTime(),
+                transaction.getDescription(),
+                transaction.getVendor(),
+                transaction.getAmount()
+        );
+    }
+
     public static void showAllTransactions(ArrayList<Transaction> transactions) {
         for (int i = transactions.size() - 1; i >= 0; i--) {
             Transaction transaction = transactions.get(i);
 
-            System.out.printf(
-                    "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                    transaction.getDate(),
-                    transaction.getTime(),
-                    transaction.getDescription(),
-                    transaction.getVendor(),
-                    transaction.getAmount()
-            );
+            printTransaction(transaction);
         }
     }
 
@@ -221,14 +225,7 @@ public class BmazonApplication {
             Transaction transaction = transactions.get(i);
 
             if (transaction.getAmount() > 0) {
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -238,14 +235,7 @@ public class BmazonApplication {
             Transaction transaction = transactions.get(i);
 
             if (transaction.getAmount() < 0) {
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -303,14 +293,7 @@ public class BmazonApplication {
             if (transactionDate.getYear() == currentYear &&
                     transactionDate.getMonthValue() == currentMonth) {
 
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -331,14 +314,7 @@ public class BmazonApplication {
             if (transactionDate.getMonthValue() == previousMonth &&
                     transactionDate.getYear() == previousYear) {
 
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -354,14 +330,7 @@ public class BmazonApplication {
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
             if (transactionDate.getYear() == currentYear) {
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -377,14 +346,7 @@ public class BmazonApplication {
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
             if (transactionDate.getYear() == previousYear) {
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
@@ -397,14 +359,7 @@ public class BmazonApplication {
             Transaction transaction = transactions.get(i);
 
             if (transaction.getVendor().equalsIgnoreCase(vendorInput)) {
-                System.out.printf(
-                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
+                printTransaction(transaction);
             }
         }
     }
