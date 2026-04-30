@@ -190,16 +190,16 @@ public class BmazonApplication {
     }
 
     public static void showAllTransactions(ArrayList<Transaction> transactions) {
-
-        for (Transaction t : transactions) {
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
 
             System.out.printf(
                     "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                    t.getDate(),
-                    t.getTime(),
-                    t.getDescription(),
-                    t.getVendor(),
-                    t.getAmount()
+                    transaction.getDate(),
+                    transaction.getTime(),
+                    transaction.getDescription(),
+                    transaction.getVendor(),
+                    transaction.getAmount()
             );
         }
     }
@@ -217,36 +217,34 @@ public class BmazonApplication {
     }
 
     public static void showDeposits(ArrayList<Transaction> transactions) {
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
 
-        for (Transaction t : transactions) {
-
-            if (t.getAmount() > 0) {
-
+            if (transaction.getAmount() > 0) {
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        t.getDate(),
-                        t.getTime(),
-                        t.getDescription(),
-                        t.getVendor(),
-                        t.getAmount()
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
                 );
             }
         }
     }
 
     public static void showPayments(ArrayList<Transaction> transactions) {
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
 
-        for (Transaction t : transactions) {
-
-            if (t.getAmount() < 0) {
-
+            if (transaction.getAmount() < 0) {
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                        t.getDate(),
-                        t.getTime(),
-                        t.getDescription(),
-                        t.getVendor(),
-                        t.getAmount()
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
                 );
             }
         }
@@ -292,14 +290,14 @@ public class BmazonApplication {
     }
 
     public static void showMonthToDate(ArrayList<Transaction> transactions) {
-        for (Transaction transaction : transactions) {
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
+        int currentMonth = today.getMonthValue();
 
-            LocalDate today = LocalDate.now();
-            int currentYear = today.getYear();
-            int currentMonth = today.getMonthValue();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
             if (transactionDate.getYear() == currentYear &&
@@ -318,18 +316,20 @@ public class BmazonApplication {
     }
 
     public static void showPreviousMonth(ArrayList<Transaction> transactions) {
-        for (Transaction transaction : transactions) {
+        LocalDate today = LocalDate.now();
+        LocalDate previousMonthDate = today.minusMonths(1);
 
-            LocalDate today = LocalDate.now();
-            LocalDate previousMonthDate = today.minusMonths(1);
+        int previousMonth = previousMonthDate.getMonthValue();
+        int previousYear = previousMonthDate.getYear();
 
-            int previousMonth = previousMonthDate.getMonthValue();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
-            if (transactionDate.getMonthValue() == previousMonth) {
+            if (transactionDate.getMonthValue() == previousMonth &&
+                    transactionDate.getYear() == previousYear) {
 
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
@@ -344,17 +344,16 @@ public class BmazonApplication {
     }
 
     public static void showYearToDate(ArrayList<Transaction> transactions) {
-        for (Transaction transaction : transactions) {
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
 
-            LocalDate today = LocalDate.now();
-            int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
             if (transactionDate.getYear() == currentYear) {
-
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
                         transaction.getDate(),
@@ -368,19 +367,16 @@ public class BmazonApplication {
     }
 
     public static void showPreviousYear(ArrayList<Transaction> transactions) {
-        for (Transaction transaction : transactions) {
+        LocalDate today = LocalDate.now();
+        int previousYear = today.minusYears(1).getYear();
 
-            LocalDate today = LocalDate.now();
-            LocalDate previousYearDate = today.minusYears(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            int previousYear = previousYearDate.getYear();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
             LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
             if (transactionDate.getYear() == previousYear) {
-
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
                         transaction.getDate(),
@@ -395,12 +391,12 @@ public class BmazonApplication {
 
     public static void showByVendor(Scanner input, ArrayList<Transaction> transactions) {
         System.out.print("Enter vendor name: ");
-        String vendorInput = input.nextLine();
+        String vendorInput = input.nextLine().trim();
 
-        for (Transaction transaction : transactions) {
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            Transaction transaction = transactions.get(i);
 
             if (transaction.getVendor().equalsIgnoreCase(vendorInput)) {
-
                 System.out.printf(
                         "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
                         transaction.getDate(),
