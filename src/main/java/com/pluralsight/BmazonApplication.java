@@ -7,19 +7,44 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class BmazonApplication {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
+        ArrayList<Transaction> transactions = loadTransactions();
+
         System.out.println("Welcome to the Bmazon application!");
 
-        menuNavigation(input);
+        menuNavigation(input, transactions);
     }
 
-    public static void menuNavigation(Scanner input) {
+    public static ArrayList<Transaction> loadTransactions() {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String line;
+
+            bufReader.readLine();
+
+            while ((line = bufReader.readLine()) != null) {
+                Transaction transaction = getTransaction(line);
+                transactions.add(transaction);
+            }
+
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return transactions;
+    }
+
+    public static void menuNavigation(Scanner input, ArrayList<Transaction> transactions) {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. Add Deposit%n" +
@@ -31,15 +56,15 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Add Deposit");
-                    addDeposit(input);
+                    addDeposit(input, transactions);
                     break;
                 case "2":
                     System.out.println("Make Payment (Debit)");
-                    makePayment(input);
+                    makePayment(input, transactions);
                     break;
                 case "3":
                     System.out.println("Ledger");
-                    runLedger(input);
+                    runLedger(input, transactions);
                     break;
                 case "0":
                     System.out.println("Exit");
@@ -48,11 +73,12 @@ public class BmazonApplication {
         }
     }
 
-    public static void addDeposit(Scanner input) {
-        System.out.print("Enter date (YYYY-MM-DD, type 'today' for today's time): ");
+    public static void addDeposit(Scanner input, ArrayList<Transaction> transactions) {
+
+        System.out.print("Enter date (YYYY-MM-DD, type 'today'): ");
         String date = input.nextLine();
 
-        System.out.print("Enter time (HH-mm-ss, type 'now' for time now): ");
+        System.out.print("Enter time (HH:mm:ss, type 'now'): ");
         String time = input.nextLine();
 
         System.out.print("Enter description: ");
@@ -66,13 +92,17 @@ public class BmazonApplication {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (Objects.equals(date, "today")) {
+        if (date.equalsIgnoreCase("today")) {
             date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
-        if (Objects.equals(time, "now")) {
+        if (time.equalsIgnoreCase("now")) {
             time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         }
+
+        Transaction transaction = new Transaction(date, time, description, vendor, amount);
+
+        transactions.add(transaction);
 
         try (FileWriter writer = new FileWriter("transactions.csv", true)) {
 
@@ -84,11 +114,12 @@ public class BmazonApplication {
         }
     }
 
-    public static void makePayment(Scanner input) {
-        System.out.print("Enter date (YYYY-MM-DD, type 'today' for today's time): ");
+    public static void makePayment(Scanner input, ArrayList<Transaction> transactions) {
+
+        System.out.print("Enter date (YYYY-MM-DD, type 'today'): ");
         String date = input.nextLine();
 
-        System.out.print("Enter time (HH-mm-ss, type 'now' for time now): ");
+        System.out.print("Enter time (HH:mm:ss, type 'now'): ");
         String time = input.nextLine();
 
         System.out.print("Enter description: ");
@@ -98,17 +129,21 @@ public class BmazonApplication {
         String vendor = input.nextLine();
 
         System.out.print("Enter amount: ");
-        double amount = (Double.parseDouble(input.nextLine()) * -1);
+        double amount = Double.parseDouble(input.nextLine()) * -1;
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (Objects.equals(date, "today")) {
+        if (date.equalsIgnoreCase("today")) {
             date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
-        if (Objects.equals(time, "now")) {
+        if (time.equalsIgnoreCase("now")) {
             time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         }
+
+        Transaction transaction = new Transaction(date, time, description, vendor, amount);
+
+        transactions.add(transaction);
 
         try (FileWriter writer = new FileWriter("transactions.csv", true)) {
 
@@ -120,7 +155,7 @@ public class BmazonApplication {
         }
     }
 
-    public static void runLedger(Scanner input) {
+    public static void runLedger(Scanner input, ArrayList<Transaction> transactions) {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. All%n" +
@@ -133,19 +168,19 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("All");
-                    showAllTransactions();
+                    showAllTransactions(transactions);
                     break;
                 case "2":
                     System.out.println("Deposits");
-                    showDeposits();
+                    showDeposits(transactions);
                     break;
                 case "3":
                     System.out.println("Payments");
-                    showPayments();
+                    showPayments(transactions);
                     break;
                 case "4":
                     System.out.println("Reports");
-                    runReports(input);
+                    runReports(input, transactions);
                     break;
                 case "0":
                     System.out.println("Home");
@@ -154,31 +189,18 @@ public class BmazonApplication {
         }
     }
 
-    public static void showAllTransactions() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
-            bufReader.readLine();
-            while((input = bufReader.readLine()) != null) {
-                Transaction transaction = getTransaction(input);
+    public static void showAllTransactions(ArrayList<Transaction> transactions) {
 
-                System.out.printf(
-                                "Date: %s " +
-                                "Time: %s " +
-                                "Description: %s " +
-                                "Vendor: %s" +
-                                "Amount: $%.2f%n",
-                        transaction.getDate(),
-                        transaction.getTime(),
-                        transaction.getDescription(),
-                        transaction.getVendor(),
-                        transaction.getAmount()
-                );
-            }
-            bufReader.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+        for (Transaction t : transactions) {
+
+            System.out.printf(
+                    "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                    t.getDate(),
+                    t.getTime(),
+                    t.getDescription(),
+                    t.getVendor(),
+                    t.getAmount()
+            );
         }
     }
 
@@ -194,63 +216,43 @@ public class BmazonApplication {
         );
     }
 
-    public static void showDeposits() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showDeposits(ArrayList<Transaction> transactions) {
 
-            bufReader.readLine();
+        for (Transaction t : transactions) {
 
-            while ((input = bufReader.readLine()) != null) {
-                Transaction transaction = getTransaction(input);
+            if (t.getAmount() > 0) {
 
-                if (transaction.getAmount() > 0) {
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        t.getDate(),
+                        t.getTime(),
+                        t.getDescription(),
+                        t.getVendor(),
+                        t.getAmount()
+                );
             }
-
-            bufReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void showPayments() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showPayments(ArrayList<Transaction> transactions) {
 
-            bufReader.readLine();
+        for (Transaction t : transactions) {
 
-            while ((input = bufReader.readLine()) != null) {
-                Transaction transaction = getTransaction(input);
+            if (t.getAmount() < 0) {
 
-                if (transaction.getAmount() < 0) {
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        t.getDate(),
+                        t.getTime(),
+                        t.getDescription(),
+                        t.getVendor(),
+                        t.getAmount()
+                );
             }
-
-            bufReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void runReports(Scanner input) {
+    public static void runReports(Scanner input, ArrayList<Transaction> transactions) {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. Month To Date%n" +
@@ -264,23 +266,23 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Month To Date");
-                    showMonthToDate();
+                    showMonthToDate(transactions);
                     break;
                 case "2":
                     System.out.println("Previous Month");
-                    showPreviousMonth();
+                    showPreviousMonth(transactions);
                     break;
                 case "3":
                     System.out.println("Year To Date");
-                    showYearToDate();
+                    showYearToDate(transactions);
                     break;
                 case "4":
                     System.out.println("Previous Year");
-                    showPreviousYear();
+                    showPreviousYear(transactions);
                     break;
                 case "5":
                     System.out.println("Search by Vendor");
-                    showByVendor(input);
+                    showByVendor(input, transactions);
                     break;
                 case "0":
                     System.out.println("Exit");
@@ -289,10 +291,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void showMonthToDate() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showMonthToDate(ArrayList<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
 
             LocalDate today = LocalDate.now();
             int currentYear = today.getYear();
@@ -300,119 +300,75 @@ public class BmazonApplication {
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            bufReader.readLine();
+            LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
-            while ((input = bufReader.readLine()) != null) {
+            if (transactionDate.getYear() == currentYear &&
+                    transactionDate.getMonthValue() == currentMonth) {
 
-                Transaction transaction = getTransaction(input);
-
-                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
-
-                if (transactionDate.getYear() == currentYear &&
-                        transactionDate.getMonthValue() == currentMonth) {
-
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
             }
-
-            bufReader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void showPreviousMonth() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showPreviousMonth(ArrayList<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
 
             LocalDate today = LocalDate.now();
             LocalDate previousMonthDate = today.minusMonths(1);
 
-            int currentYear = today.getYear();
             int previousMonth = previousMonthDate.getMonthValue();
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            bufReader.readLine();
+            LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
-            while ((input = bufReader.readLine()) != null) {
+            if (transactionDate.getMonthValue() == previousMonth) {
 
-                Transaction transaction = getTransaction(input);
-
-                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
-
-                if (transactionDate.getYear() == currentYear &&
-                        transactionDate.getMonthValue() == previousMonth) {
-
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
             }
-
-            bufReader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void showYearToDate() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showYearToDate(ArrayList<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
 
             LocalDate today = LocalDate.now();
             int currentYear = today.getYear();
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            bufReader.readLine();
+            LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
-            while ((input = bufReader.readLine()) != null) {
+            if (transactionDate.getYear() == currentYear) {
 
-                Transaction transaction = getTransaction(input);
-
-                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
-
-                if (transactionDate.getYear() == currentYear) {
-
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
             }
-
-            bufReader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void showPreviousYear() {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String input;
+    public static void showPreviousYear(ArrayList<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
 
             LocalDate today = LocalDate.now();
             LocalDate previousYearDate = today.minusYears(1);
@@ -421,65 +377,39 @@ public class BmazonApplication {
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            bufReader.readLine();
+            LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
 
-            while ((input = bufReader.readLine()) != null) {
+            if (transactionDate.getYear() == previousYear) {
 
-                Transaction transaction = getTransaction(input);
-
-                LocalDate transactionDate = LocalDate.parse(transaction.getDate(), formatter);
-
-                if (transactionDate.getYear() == previousYear) {
-
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
             }
-
-            bufReader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public static void showByVendor(Scanner input) {
-        try {
-            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
-            String line;
+    public static void showByVendor(Scanner input, ArrayList<Transaction> transactions) {
+        System.out.print("Enter vendor name: ");
+        String vendorInput = input.nextLine();
 
-            System.out.print("Enter vendor name: ");
-            String vendorInput = input.nextLine();
+        for (Transaction transaction : transactions) {
 
-            bufReader.readLine();
+            if (transaction.getVendor().equalsIgnoreCase(vendorInput)) {
 
-            while ((line = bufReader.readLine()) != null) {
-
-                Transaction transaction = getTransaction(line);
-
-                if (transaction.getVendor().equalsIgnoreCase(vendorInput)) {
-
-                    System.out.printf(
-                            "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
-                            transaction.getDate(),
-                            transaction.getTime(),
-                            transaction.getDescription(),
-                            transaction.getVendor(),
-                            transaction.getAmount()
-                    );
-                }
+                System.out.printf(
+                        "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount()
+                );
             }
-
-            bufReader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
