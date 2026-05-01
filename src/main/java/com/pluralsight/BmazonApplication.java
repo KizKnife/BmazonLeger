@@ -11,16 +11,20 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class BmazonApplication {
-    public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
+    // Global Scanner and ArrayList to be used in methods
+    private static final Scanner input = new Scanner(System.in);
+    private static ArrayList<Transaction> transactions = new ArrayList<>();
 
-        ArrayList<Transaction> transactions = loadTransactions();
+    // Main method
+    public static void main(String[] args) {
+        transactions = loadTransactions();
 
         System.out.println("Welcome to the Bmazon application!");
 
-        menuNavigation(input, transactions);
+        menuNavigation();
     }
 
+    // Creates ArrayList of transactions.csv
     public static ArrayList<Transaction> loadTransactions() {
         ArrayList<Transaction> transactions = new ArrayList<>();
 
@@ -44,7 +48,21 @@ public class BmazonApplication {
         return transactions;
     }
 
-    public static void menuNavigation(Scanner input, ArrayList<Transaction> transactions) {
+    // Grabs entries from transactions.csv and splits from "|" character
+    public static Transaction getTransaction(String input) {
+        String[] transactionInfo = input.split("\\|");
+
+        return new Transaction(
+                transactionInfo[0].trim(),
+                transactionInfo[1].trim(),
+                transactionInfo[2].trim(),
+                transactionInfo[3].trim(),
+                Double.parseDouble(transactionInfo[4].trim())
+        );
+    }
+
+    // Menu navigation
+    public static void menuNavigation() {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. Add Deposit%n" +
@@ -56,15 +74,15 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Add Deposit");
-                    addDeposit(input, transactions);
+                    addDeposit();
                     break;
                 case "2":
                     System.out.println("Make Payment (Debit)");
-                    makePayment(input, transactions);
+                    makePayment();
                     break;
                 case "3":
                     System.out.println("Ledger");
-                    runLedger(input, transactions);
+                    runLedger();
                     break;
                 case "0":
                     System.out.println("Exit");
@@ -73,7 +91,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void addDeposit(Scanner input, ArrayList<Transaction> transactions) {
+    // Asks user for date, time, description, vendor, & amount; adds all values to transactions ArrayList and writes to transactions.csv as deposit
+    public static void addDeposit() {
 
         System.out.print("Enter date (YYYY-MM-DD, type 'today'): ");
         String date = input.nextLine();
@@ -114,7 +133,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void makePayment(Scanner input, ArrayList<Transaction> transactions) {
+    // Asks user for date, time, description, vendor, & amount; adds all values to transactions ArrayList and writes to transactions.csv as payment
+    public static void makePayment() {
 
         System.out.print("Enter date (YYYY-MM-DD, type 'today'): ");
         String date = input.nextLine();
@@ -155,7 +175,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void runLedger(Scanner input, ArrayList<Transaction> transactions) {
+    // Menu navigation for ledger options
+    public static void runLedger() {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. All%n" +
@@ -168,19 +189,19 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("All");
-                    showAllTransactions(transactions);
+                    showAllTransactions();
                     break;
                 case "2":
                     System.out.println("Deposits");
-                    showDeposits(transactions);
+                    showDeposits();
                     break;
                 case "3":
                     System.out.println("Payments");
-                    showPayments(transactions);
+                    showPayments();
                     break;
                 case "4":
                     System.out.println("Reports");
-                    runReports(input, transactions);
+                    runReports();
                     break;
                 case "0":
                     System.out.println("Home");
@@ -189,6 +210,7 @@ public class BmazonApplication {
         }
     }
 
+    // Method to print transactions for redundancy
     public static void printTransaction(Transaction transaction) {
         System.out.printf(
                 "Date: %s Time: %s Description: %s Vendor: %s Amount: $%.2f%n",
@@ -200,7 +222,8 @@ public class BmazonApplication {
         );
     }
 
-    public static void showAllTransactions(ArrayList<Transaction> transactions) {
+    // Starts at beginning of transaction ArrayList and calls printTransaction(); loops from last entry
+    public static void showAllTransactions() {
         for (int i = transactions.size() - 1; i >= 0; i--) {
             Transaction transaction = transactions.get(i);
 
@@ -208,19 +231,8 @@ public class BmazonApplication {
         }
     }
 
-    public static Transaction getTransaction(String input) {
-        String[] transactionInfo = input.split("\\|");
-
-        return new Transaction(
-                transactionInfo[0].trim(),
-                transactionInfo[1].trim(),
-                transactionInfo[2].trim(),
-                transactionInfo[3].trim(),
-                Double.parseDouble(transactionInfo[4].trim())
-        );
-    }
-
-    public static void showDeposits(ArrayList<Transaction> transactions) {
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with positive amount
+    public static void showDeposits() {
         for (int i = transactions.size() - 1; i >= 0; i--) {
             Transaction transaction = transactions.get(i);
 
@@ -230,7 +242,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void showPayments(ArrayList<Transaction> transactions) {
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with negative amount
+    public static void showPayments() {
         for (int i = transactions.size() - 1; i >= 0; i--) {
             Transaction transaction = transactions.get(i);
 
@@ -240,7 +253,8 @@ public class BmazonApplication {
         }
     }
 
-    public static void runReports(Scanner input, ArrayList<Transaction> transactions) {
+    // Menu navigation for reports options
+    public static void runReports() {
         while (true) {
             System.out.printf("What do you want to do?%n" +
                     "1. Month To Date%n" +
@@ -254,23 +268,23 @@ public class BmazonApplication {
             switch(input.nextLine()) {
                 case "1":
                     System.out.println("Month To Date");
-                    showMonthToDate(transactions);
+                    showMonthToDate();
                     break;
                 case "2":
                     System.out.println("Previous Month");
-                    showPreviousMonth(transactions);
+                    showPreviousMonth();
                     break;
                 case "3":
                     System.out.println("Year To Date");
-                    showYearToDate(transactions);
+                    showYearToDate();
                     break;
                 case "4":
                     System.out.println("Previous Year");
-                    showPreviousYear(transactions);
+                    showPreviousYear();
                     break;
                 case "5":
                     System.out.println("Search by Vendor");
-                    showByVendor(input, transactions);
+                    showByVendor();
                     break;
                 case "0":
                     System.out.println("Exit");
@@ -279,7 +293,9 @@ public class BmazonApplication {
         }
     }
 
-    public static void showMonthToDate(ArrayList<Transaction> transactions) {
+    // Initialize time; finds current year and month; sets date format as "yyyy-MM-dd";
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with current month
+    public static void showMonthToDate() {
         LocalDate today = LocalDate.now();
         int currentYear = today.getYear();
         int currentMonth = today.getMonthValue();
@@ -298,7 +314,9 @@ public class BmazonApplication {
         }
     }
 
-    public static void showPreviousMonth(ArrayList<Transaction> transactions) {
+    // Initialize time; finds current year and month; sets date format as "yyyy-MM-dd";
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with previous year and month
+    public static void showPreviousMonth() {
         LocalDate today = LocalDate.now();
         LocalDate previousMonthDate = today.minusMonths(1);
 
@@ -319,7 +337,9 @@ public class BmazonApplication {
         }
     }
 
-    public static void showYearToDate(ArrayList<Transaction> transactions) {
+    // Initialize time; finds current year and month; sets date format as "yyyy-MM-dd";
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with current year
+    public static void showYearToDate() {
         LocalDate today = LocalDate.now();
         int currentYear = today.getYear();
 
@@ -335,7 +355,9 @@ public class BmazonApplication {
         }
     }
 
-    public static void showPreviousYear(ArrayList<Transaction> transactions) {
+    // Initialize time; finds current year and month; sets date format as "yyyy-MM-dd";
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with previous year
+    public static void showPreviousYear() {
         LocalDate today = LocalDate.now();
         int previousYear = today.minusYears(1).getYear();
 
@@ -351,7 +373,9 @@ public class BmazonApplication {
         }
     }
 
-    public static void showByVendor(Scanner input, ArrayList<Transaction> transactions) {
+    // Prompts user to enter Vendor name
+    // Loops through transactions ArrayList starting from the last entry and prints transactions with user input vendor name
+    public static void showByVendor() {
         System.out.print("Enter vendor name: ");
         String vendorInput = input.nextLine().trim();
 
